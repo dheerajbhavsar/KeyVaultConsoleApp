@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System.Reflection;
 
 namespace KeyVaultConsoleApp;
 
@@ -14,6 +15,8 @@ public class Program
         var configBuilder = new ConfigurationBuilder();
         config = configBuilder
             .AddJsonFile("application.json")
+            .AddJsonFile("local.application.json")
+            .AddUserSecrets(Assembly.GetExecutingAssembly())
             .Build();
     }
 
@@ -36,7 +39,7 @@ public class Program
 
     private static KeyVaultClient KvClient(string clientId, string clientSecret)
     {
-        return new KeyVaultClient(async (authority, resource, code) =>
+        return new KeyVaultClient(async (authority, resource, scope) =>
         {
             var context = new AuthenticationContext(authority);
             var credential = new ClientCredential(clientId, clientSecret);
